@@ -10,6 +10,7 @@ TARGET ?= classA
 GCC_ROOT = /opt/gcc-arm-none-eabi-5_4-2016q3
 CC       = $(GCC_ROOT)/bin/arm-none-eabi-gcc
 CXX      = $(GCC_ROOT)/bin/arm-none-eabi-g++
+LD      = $(GCC_ROOT)/bin/arm-none-eabi-ld
 OBJCOPY  = $(GCC_ROOT)/bin/arm-none-eabi-objcopy
 OBJSIZE  = $(GCC_ROOT)/bin/arm-none-eabi-size
 
@@ -18,6 +19,10 @@ DEVICE   = STM32L1xx_HAL_Driver
 MCU      = stm32
 LINKER_DEF = src/boards/RAK811BreakBoard/cmsis/arm-gcc/STM32L151XBA_FLASH.ld
 BUILD    = Debug
+
+
+
+INCLUDE_DIRS := $(GCC_ROOT)/arm-none-eabi/include
 
 
 #====================================================
@@ -81,9 +86,9 @@ C_SRCS := \
 A_SRCS := \
 	src/boards/$(PLATFORM)/cmsis/arm-gcc/startup_stm32l151xba.s
 
-INCLUDE_DIRS := \
+INCLUDE_DIRS += \
 	src  \
-	src/boards/$(PLATFORM)  \
+	src/boards/$(PLATFORM) \
 	src/boards/$(PLATFORM)/cmsis  \
 	src/boards/mcu/$(MCU)/  \
 	src/boards/mcu/$(MCU)/cmsis  \
@@ -113,19 +118,18 @@ CFLAGS += -DUSE_DEBUGGER
 endif
 
 #for the C
-CFLAGS += -c -g -gdwarf-2 -mcpu=cortex-m3 -mthumb -Os -Wall -std=c99
-CFLAGS += -fmessage-length=0 -mno-sched-prolog -fno-builtin -ffunction-sections -fdata-sections
+CFLAGS += -mcpu=cortex-m3 -mthumb -g2 -Wall -Os -c
 CFLAGS += -MMD -MP -MF"${@:.o=.d}" -MT"$@" -o "$@"
+CFLAGS += -fno-builtin-printf
+
 
 #for the stub
 ASFLAGS += -g -gdwarf-2 -mcpu=cortex-m3 -mthumb -x assembler-with-cpp -c 
 
 #for the linker
-CXXFLAGS := -g -gdwarf-2 -mcpu=cortex-m3 -mthumb 
-CXXFLAGS += -Wl,--start-group -lgcc -lc -lnosys -Wl,--end-group 
-CXXFLAGS += --specs=nosys.specs  --specs=nano.specs 
-CXXFLAGS += -Xlinker --gc-sections -Xlinker -Map="$(BUILD)/$(TARGET).map"
-
+CXXFLAGS := -mcpu=cortex-m3 -mthumb -gdwarf-2 -Os -g2 -g
+CXXFLAGS += -Wl,--gc-sections --specs=nano.specs 
+CXXFLAGS += -Xlinker -Map="$(BUILD)/$(TARGET).map"
 
 .PHONY: all clean distclean
 
@@ -143,7 +147,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GNU ARM C++ Linker'
-	$(CXX) $(CXXFLAGS)  -T "$(LINKER_DEF)" -o $(BUILD)/$(TARGET).axf $(OBJS) $(S_OBJS)
+	$(CC) $(CXXFLAGS)  -T "$(LINKER_DEF)" -o $(BUILD)/$(TARGET).axf $(OBJS) $(S_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
