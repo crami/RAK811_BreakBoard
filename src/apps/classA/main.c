@@ -26,7 +26,7 @@ Maintainer: Miguel Luis and Gregory Cristian
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            20000
+#define APP_TX_DUTYCYCLE                            10000
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
@@ -214,41 +214,46 @@ void dump_hex2str(uint8_t *buf , uint8_t len)
  */
 void test_gps(void)
 {
-	  double  latitude, longitude = 0;
+    double  latitude, longitude = 0;
     int16_t altitudeGps = 0xFFFF;
     uint8_t ret;
-	  ret = GpsGetLatestGpsPositionDouble( &latitude, &longitude );
-		altitudeGps = GpsGetLatestGpsAltitude( );                           // in m
-		printf("[Debug]: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	    	
+    ret = GpsGetLatestGpsPositionDouble( &latitude, &longitude );
+    altitudeGps = GpsGetLatestGpsAltitude( );                           // in m
+    if (ret == SUCCESS) {
+      printf("[Debug] SUCCESS: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	    	
+    } else {
+      printf("[DEBUG] no GPS fix!\n");
+    }
 }
 
 void test_temp(void)
 {
-	  int8_t  tempr = 25;
+    int8_t  tempr = 25;
 	
-		LIS3DH_GetTempRaw(&tempr); //only tempr changed value
-		tempr = tempr + 20; // temprature should be calibration  in a right temp for every device
-	  printf("[Debug]: tempr: %d Bat: %dmv\r\n", tempr,  BoardBatteryMeasureVolage( ));
+    LIS3DH_GetTempRaw(&tempr); //only tempr changed value
+    tempr = tempr + 20; // temprature should be calibration  in a right temp for every device
+    printf("[Debug]: tempr: %d Bat: %dmv\r\n", tempr,  BoardBatteryMeasureVolage( ));
 }
 static void PrepareTxFrame( uint8_t port )
 {
-	  double  latitude, longitude = 0;
+    double  latitude, longitude = 0;
     int16_t altitudeGps = 0xFFFF;
     int8_t  tempr = 25;
     uint8_t ret;
-	 uint16_t bat;
+    uint16_t bat;
 	
     switch( port )
     {
 		//https://mydevices.com/cayenne/docs/lora/#lora-cayenne-low-power-payload
 		//cayenne LPP GPS
-    case 2:
-				{
-					ret = GpsGetLatestGpsPositionDouble( &latitude, &longitude );
-				  altitudeGps = GpsGetLatestGpsAltitude( );                           // in m
-					printf("[Debug]: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	
+      case 2:
+            {
+                ret = GpsGetLatestGpsPositionDouble( &latitude, &longitude );
+		altitudeGps = GpsGetLatestGpsAltitude( );                           // in m
       		if (ret == SUCCESS) 
 					{
+                                                printf("[Debug] SUCCESS: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	
+                                            
 						AppData[0] = 0x01;
 						AppData[1] = 0x88;
 						AppData[2] = ((int32_t)(latitude*10000) >> 16) & 0xFF;
@@ -261,14 +266,15 @@ static void PrepareTxFrame( uint8_t port )
 						AppData[9] = ((altitudeGps*100) >> 8) & 0xFF;
 						AppData[10] = (altitudeGps*100) & 0xFF; 
 						AppDataSize = 11;
-					}	else {
+					} else {
 					  AppDataSize = 0;
-					}			
-        }
+					  printf("[DEBUG] no GPS fix!\n");
+					} 
+        } 
         break;
 		//cayenne LPP Temp
-    case 3:
-				{
+      case 3:
+            {
 					AppData[0] = 0x02;
 					AppData[1] = 0x67;
 #if 1
@@ -290,7 +296,7 @@ static void PrepareTxFrame( uint8_t port )
         }
         break;
 		//cayenne LPP Acceleration
-    case 4:
+      case 4:
 				{
 					AppData[0] = 0x03;
 					AppData[1] = 0x71;
@@ -870,9 +876,9 @@ int main( void )
                 if( NextTx == true )
                 {
                     PrepareTxFrame( AppPort++ );
-									  if (AppPort >=5) {
-										    AppPort = 2;
-										}
+                    if (AppPort >=5) {
+		      AppPort = 2;
+		    }
                     NextTx = SendFrame( );
                 }
                 if( ComplianceTest.Running == true )
