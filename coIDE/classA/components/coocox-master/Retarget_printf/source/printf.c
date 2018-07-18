@@ -33,7 +33,7 @@ __attribute__ ((weak)) void PrintChar(char c)
 }
 
 /** Maximum string size allowed (in bytes). */
-#define MAX_STRING_SIZE         100
+#define MAX_STRING_SIZE         120
 
 
 /** Required for proper compilation. */
