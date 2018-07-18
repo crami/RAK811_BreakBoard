@@ -136,8 +136,12 @@ void GpsConvertPositionFromStringToNumerical( void )
     double valueTmp3;
     double valueTmp4;
 
+    printf("[Debug GpsConvertPositionFromStringToNumerical] > Lat: %s Lon:%s <\r\n", NmeaGpsData.NmeaLatitude, NmeaGpsData.NmeaLongitude);
+
+//    printf("[Debug GpsConvertPositionFromStringToNumerical]\n");
+
     // Convert the latitude from ASCII to uint8_t values
-    for( i = 0 ; i < 10 ; i++ )
+    for( i = 0 ; i < 9 ; i++ )
     {
         NmeaGpsData.NmeaLatitude[i] = NmeaGpsData.NmeaLatitude[i] & 0xF;
     }
@@ -148,11 +152,15 @@ void GpsConvertPositionFromStringToNumerical( void )
                 ( double )NmeaGpsData.NmeaLatitude[7] * 10.0 + ( double )NmeaGpsData.NmeaLatitude[8];
                 
     Latitude = valueTmp1 + ( ( valueTmp2 + ( valueTmp3 * 0.0001 ) ) / 60.0 );
+    
+//    printf("[Debug Latitude 1] %lf - %lf - %lf\n", valueTmp1, valueTmp2, valueTmp3);
 
     if( NmeaGpsData.NmeaLatitudePole[0] == 'S' )
     {
         Latitude *= -1;
     }
+    
+//    printf("[Debug Latitude 2] %.4lf\n\n", Latitude);
  
     // Convert the longitude from ASCII to uint8_t values
     for( i = 0 ; i < 10 ; i++ )
@@ -162,15 +170,20 @@ void GpsConvertPositionFromStringToNumerical( void )
     // Convert longitude from degree/minute/second (DMS) format into decimal
     valueTmp1 = ( double )NmeaGpsData.NmeaLongitude[0] * 100.0 + ( double )NmeaGpsData.NmeaLongitude[1] * 10.0 + ( double )NmeaGpsData.NmeaLongitude[2];
     valueTmp2 = ( double )NmeaGpsData.NmeaLongitude[3] * 10.0 + ( double )NmeaGpsData.NmeaLongitude[4];
-    valueTmp3 = ( double )NmeaGpsData.NmeaLongitude[6] * 1000.0 + ( double )NmeaGpsData.NmeaLongitude[7] * 100;
+    valueTmp3 = ( double )NmeaGpsData.NmeaLongitude[6] * 1000.0 + ( double )NmeaGpsData.NmeaLongitude[7] * 100.0;
     valueTmp4 = ( double )NmeaGpsData.NmeaLongitude[8] * 10.0 + ( double )NmeaGpsData.NmeaLongitude[9];
 
     Longitude = valueTmp1 + ( valueTmp2 / 60.0 ) + ( ( ( valueTmp3 + valueTmp4 ) * 0.0001 ) / 60.0 );
+    
+//    printf("[Debug Longitude 1] %lf - %lf - %lf - %lf\n", valueTmp1, valueTmp2, valueTmp3, valueTmp4);
 
     if( NmeaGpsData.NmeaLongitudePole[0] == 'W' )
     {
         Longitude *= -1;
     }
+    
+//    printf("[Debug Longitude 2] %.4lf\n\n", Longitude);
+    
 }
 
 
@@ -185,6 +198,9 @@ uint8_t GpsGetLatestGpsPositionDouble( double *lati, double *longi )
     {
         GpsResetPosition( );
     }
+    
+//    printf("[Debug GpsGetLatestGpsPositionDouble] %f %f\n", Latitude, Longitude);
+    
     *lati = Latitude;
     *longi = Longitude;
     return status;
@@ -320,6 +336,8 @@ uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         return FAIL;
     }
 
+    printf("[Debug GPS]: %s\r\n", rxBuffer);
+
     fieldSize = 0;
     while( rxBuffer[i + fieldSize++] != ',' )
     {
@@ -361,6 +379,7 @@ uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             NmeaGpsData.NmeaLatitude[j] = rxBuffer[i];
         }
+        NmeaGpsData.NmeaLatitude[10] = 0x0;
         // NmeaLatitudePole
         fieldSize = 0;
         while( rxBuffer[i + fieldSize++] != ',' )
@@ -387,6 +406,7 @@ uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             NmeaGpsData.NmeaLongitude[j] = rxBuffer[i];
         }
+        NmeaGpsData.NmeaLongitude[11] = 0x0;
         // NmeaLongitudePole
         fieldSize = 0;
         while( rxBuffer[i + fieldSize++] != ',' )
@@ -536,6 +556,7 @@ uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             NmeaGpsData.NmeaLatitude[j] = rxBuffer[i];
         }
+        NmeaGpsData.NmeaLatitude[10] = 0x0;
         // NmeaLatitudePole
         fieldSize = 0;
         while( rxBuffer[i + fieldSize++] != ',' )
@@ -562,6 +583,7 @@ uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         {
             NmeaGpsData.NmeaLongitude[j] = rxBuffer[i];
         }
+        NmeaGpsData.NmeaLongitude[11] = 0x0;
         // NmeaLongitudePole
         fieldSize = 0;
         while( rxBuffer[i + fieldSize++] != ',' )
@@ -634,8 +656,10 @@ void GpsFormatGpsData( void )
     {
         HasFix = ( NmeaGpsData.NmeaDataStatus[0] == 0x41 ) ? true : false;
     }
-    GpsConvertPositionFromStringToNumerical( );
-    GpsConvertPositionIntoBinary( );
+    if (HasFix) {
+      GpsConvertPositionFromStringToNumerical( );
+      GpsConvertPositionIntoBinary( );
+    }
 }
 
 void GpsResetPosition( void )

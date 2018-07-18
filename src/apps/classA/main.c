@@ -26,13 +26,13 @@ Maintainer: Miguel Luis and Gregory Cristian
 /*!
  * Defines the application data transmission duty cycle. 5s, value in [ms].
  */
-#define APP_TX_DUTYCYCLE                            10000
+#define APP_TX_DUTYCYCLE                            20000
 
 /*!
  * Defines a random delay for application data transmission duty cycle. 1s,
  * value in [ms].
  */
-#define APP_TX_DUTYCYCLE_RND                        1000
+#define APP_TX_DUTYCYCLE_RND                        10000
 
 /*!
  * Default datarate
@@ -220,9 +220,10 @@ void test_gps(void)
     ret = GpsGetLatestGpsPositionDouble( &latitude, &longitude );
     altitudeGps = GpsGetLatestGpsAltitude( );                           // in m
     if (ret == SUCCESS) {
-      printf("[Debug] SUCCESS: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	    	
+//      printf("[Debug] SUCCESS: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	    	
+      printf("[DEBUG] GPS fix!\r\n");
     } else {
-      printf("[DEBUG] no GPS fix!\n");
+      printf("[DEBUG] no GPS fix!\r\n");
     }
 }
 
@@ -252,7 +253,8 @@ static void PrepareTxFrame( uint8_t port )
 		altitudeGps = GpsGetLatestGpsAltitude( );                           // in m
       		if (ret == SUCCESS) 
 					{
-                                                printf("[Debug] SUCCESS: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);	
+                                                //printf("[Debug] SUCCESS: latitude: %f, longitude: %f , altitudeGps: %d \n", latitude, longitude, altitudeGps);
+                                                printf("[DEBUG] GPS fix! \r\n");
                                             
 						AppData[0] = 0x01;
 						AppData[1] = 0x88;
@@ -268,7 +270,7 @@ static void PrepareTxFrame( uint8_t port )
 						AppDataSize = 11;
 					} else {
 					  AppDataSize = 0;
-					  printf("[DEBUG] no GPS fix!\n");
+					  printf("[DEBUG] no GPS fix! \r\n");
 					} 
         } 
         break;
@@ -876,9 +878,12 @@ int main( void )
                 if( NextTx == true )
                 {
                     PrepareTxFrame( AppPort++ );
+                    /*
                     if (AppPort >=5) {
 		      AppPort = 2;
 		    }
+		    */
+		    AppPort = 2;
                     NextTx = SendFrame( );
                 }
                 if( ComplianceTest.Running == true )
