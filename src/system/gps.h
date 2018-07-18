@@ -21,9 +21,9 @@ typedef struct
     char NmeaDataType[6];
     char NmeaUtcTime[11];
     char NmeaDataStatus[2];
-    char NmeaLatitude[10];
+    char NmeaLatitude[11];
     char NmeaLatitudePole[2];
-    char NmeaLongitude[11];
+    char NmeaLongitude[12];
     char NmeaLongitudePole[2];
     char NmeaFixQuality[2];
     char NmeaSatelliteTracked[3];
