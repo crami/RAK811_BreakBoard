@@ -8,7 +8,8 @@
 TARGET ?= classA
 
 #GCC_ROOT = /opt/gcc-arm-none-eabi-5_4-2016q3
-GCC_ROOT = /opt/gcc-arm-none-eabi-7-2017-q4-major
+#GCC_ROOT = /opt/gcc-arm-none-eabi-7-2017-q4-major
+GCC_ROOT = /opt/gcc-arm-none-eabi-7-2018-q2-update/
 
 CC       = $(GCC_ROOT)/bin/arm-none-eabi-gcc
 CXX      = $(GCC_ROOT)/bin/arm-none-eabi-g++
@@ -20,7 +21,6 @@ DEVICE   = STM32L1xx_HAL_Driver
 MCU      = stm32
 LINKER_DEF = src/boards/RAK811BreakBoard/cmsis/arm-gcc/STM32L151XBA_FLASH.ld
 BUILD    = Debug
-
 
 #====================================================
 C_SRCS := \
