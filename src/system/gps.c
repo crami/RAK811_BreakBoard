@@ -136,7 +136,7 @@ void GpsConvertPositionFromStringToNumerical( void )
     double valueTmp3;
     double valueTmp4;
 
-    printf("[Debug GpsConvertPositionFromStringToNumerical] > Lat: %s Lon:%s <\r\n", NmeaGpsData.NmeaLatitude, NmeaGpsData.NmeaLongitude);
+    printf("[Debug StringToNumerical] > Lat: %s Lon:%s <\r\n", NmeaGpsData.NmeaLatitude, NmeaGpsData.NmeaLongitude);
 
 //    printf("[Debug GpsConvertPositionFromStringToNumerical]\n");
 
@@ -336,7 +336,7 @@ uint8_t GpsParseGpsData( int8_t *rxBuffer, int32_t rxBufferSize )
         return FAIL;
     }
 
-    printf("[Debug GPS]: %s\r\n", rxBuffer);
+//    printf("[Debug GPS]: %s\r\n", rxBuffer);
 
     fieldSize = 0;
     while( rxBuffer[i + fieldSize++] != ',' )
